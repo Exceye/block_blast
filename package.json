@@ -1,0 +1,15 @@
+{
+  "name": "block-blast-solo",
+  "version": "1.1.0",
+  "private": true,
+  "description": "Block Blast Solo Unlimited - game puzzle web 8x8",
+  "scripts": {
+    "test": "node --test \"tests/**/*.test.js\"",
+    "test:unit": "node --test \"tests/unit/*.test.js\"",
+    "test:browser": "node --test \"tests/browser/*.test.js\"",
+    "serve": "python3 -m http.server 8000"
+  },
+  "devDependencies": {
+    "playwright": "^1.48.0"
+  }
+}

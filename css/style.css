@@ -1,0 +1,243 @@
+/* ============================================================
+   style.css — tampilan. Ukuran papan dihitung lewat variabel CSS
+   sehingga otomatis pas di HP maupun desktop.
+   ============================================================ */
+:root {
+  /* ukuran: papan selalu persegi & muat di layar */
+  --board: clamp(250px, min(94vw, calc(100vh - 360px)), 500px);
+  --board: clamp(250px, min(94vw, calc(100svh - 360px)), 500px);
+  --pad: 8px;
+  --gap: 3px;
+  --cell: calc((var(--board) - 2 * var(--pad) - 7 * var(--gap)) / 8);
+
+  --bg1: #2a1b5e;
+  --bg2: #0d0a24;
+  --accent: #ffd93d;
+  --text: #f4f1ff;
+  --muted: #a99fd6;
+  --block-tex: none;      /* diisi oleh textures.js */
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  overscroll-behavior: none;
+}
+
+body {
+  font-family: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+  color: var(--text);
+  background: radial-gradient(circle at 50% 0%, var(--bg1), var(--bg2) 70%) fixed;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: background .6s;
+}
+body[data-mode="eased"]    { --bg1: #124a4a; }
+body[data-mode="pressure"] { --bg1: #6a1226; }
+
+#app {
+  width: var(--board);
+  margin: 0 auto;
+  padding: 14px 0 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ---------- HUD ---------- */
+.hud { display: flex; gap: 8px; width: 100%; }
+.stat {
+  flex: 1;
+  background: rgba(255, 255, 255, .07);
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 12px;
+  padding: 6px 10px;
+  display: flex; flex-direction: column; align-items: center;
+}
+.stat .label { font-size: 10px; letter-spacing: .14em; color: var(--muted); }
+.stat span:last-child { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; }
+
+.status {
+  width: 100%;
+  display: flex; align-items: center; justify-content: space-between;
+  margin: 10px 0;
+  gap: 8px;
+}
+.badge {
+  font-size: 12px; font-weight: 800; letter-spacing: .1em;
+  padding: 6px 12px; border-radius: 999px;
+  background: #3a2f78; color: #fff;
+  transition: background .4s, box-shadow .4s;
+}
+.badge.eased    { background: #12806f; }
+.badge.pressure { background: #d6203f; box-shadow: 0 0 16px #ff3355aa; animation: pulse 1s infinite alternate; }
+
+#clear-dots { display: flex; gap: 6px; }
+#clear-dots i {
+  width: 12px; height: 12px; border-radius: 50%;
+  background: rgba(255, 255, 255, .15);
+  transition: background .3s, transform .3s;
+}
+#clear-dots i.on { background: var(--accent); transform: scale(1.15); }
+#clear-dots.hot i.on { background: #ff3355; box-shadow: 0 0 8px #ff3355; }
+
+.actions { display: flex; gap: 6px; }
+.actions button {
+  width: 34px; height: 34px; border-radius: 10px; border: 0;
+  background: rgba(255, 255, 255, .1); color: #fff; font-size: 16px; cursor: pointer;
+}
+.actions button:active { transform: scale(.92); }
+
+/* ---------- papan ---------- */
+#board-wrap { position: relative; width: var(--board); }
+
+#board {
+  display: grid;
+  grid-template-columns: repeat(8, var(--cell));
+  grid-auto-rows: var(--cell);
+  gap: var(--gap);
+  padding: var(--pad);
+  width: var(--board);
+  background: rgba(255, 255, 255, .06);
+  border: 1px solid rgba(255, 255, 255, .14);
+  border-radius: 18px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, .4);
+}
+
+.cell {
+  border-radius: 6px;
+  background: rgba(255, 255, 255, .07);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .04);
+}
+
+/* Blok terisi: warna + tekstur fase + kilap.
+   Urutan lapisan: tekstur (atas) -> kilap -> warna dasar (bawah). */
+.cell.filled,
+.pc.filled {
+  background-color: var(--c);
+  background-image: var(--block-tex, none),
+                    linear-gradient(145deg, rgba(255,255,255,.42), rgba(255,255,255,0) 45%, rgba(0,0,0,.28));
+  background-size: cover, 100% 100%;
+  background-blend-mode: overlay, normal;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.5),
+              inset 0 -3px 0 rgba(0,0,0,.25),
+              0 2px 6px rgba(0,0,0,.35);
+}
+
+/* Cadangan bila file tekstur tidak ada: tiap fase diberi gaya warna berbeda */
+body.no-tex[data-phase="2"] { --fx: hue-rotate(25deg) saturate(1.1); }
+body.no-tex[data-phase="3"] { --fx: hue-rotate(60deg) saturate(1.2); }
+body.no-tex[data-phase="4"] { --fx: hue-rotate(110deg) saturate(1.2); }
+body.no-tex[data-phase="5"] { --fx: hue-rotate(170deg) saturate(1.3); }
+body.no-tex[data-phase="6"] { --fx: hue-rotate(230deg) saturate(1.3) brightness(1.1); }
+body.no-tex .cell.filled, body.no-tex .pc.filled { filter: var(--fx, none); }
+
+/* Pratinjau saat drag */
+.cell.ghost { background: var(--g); opacity: .55; }
+.cell.will-clear {
+  outline: 2px solid #fff;
+  outline-offset: -2px;
+  box-shadow: 0 0 14px #fff;
+  animation: pulse .5s infinite alternate;
+  z-index: 1;
+}
+
+/* Animasi hapus */
+.cell.clearing { animation: pop .34s ease-in forwards; z-index: 2; }
+
+/* ---------- tray ---------- */
+#tray {
+  display: flex; gap: 10px;
+  width: var(--board);
+  margin-top: 18px;
+}
+.slot {
+  flex: 1;
+  height: calc(var(--cell) * 3);
+  display: grid; place-items: center;
+  background: rgba(255, 255, 255, .05);
+  border-radius: 14px;
+}
+.piece {
+  display: grid; gap: var(--gap);
+  --pc: calc(var(--cell) * .5);
+  touch-action: none;          /* penting: cegah scroll saat drag di HP */
+  cursor: grab;
+  padding: 8px;                /* area sentuh lebih besar */
+  transition: transform .12s;
+}
+.piece:hover { transform: scale(1.08); }
+.piece.dragging { opacity: .2; }
+
+.pc { width: var(--pc); height: var(--pc); border-radius: 4px; }
+.pc.off { visibility: hidden; }
+
+#drag-layer { position: fixed; inset: 0; pointer-events: none; z-index: 50; }
+.drag-piece {
+  position: fixed; left: 0; top: 0;
+  display: grid; gap: var(--gap);
+  --pc: var(--cell);
+  will-change: transform;
+  filter: drop-shadow(0 10px 12px rgba(0, 0, 0, .45));
+}
+.drag-piece .pc { border-radius: 6px; }
+
+/* ---------- efek ---------- */
+#fx { position: absolute; inset: 0; pointer-events: none; overflow: visible; z-index: 5; }
+.particle { position: absolute; width: 8px; height: 8px; border-radius: 2px; }
+
+.popup {
+  position: absolute; left: 50%; top: 42%;
+  transform: translate(-50%, 0);
+  font-size: 26px; font-weight: 900; white-space: nowrap;
+  color: #fff; text-shadow: 0 2px 10px #000, 0 0 18px var(--accent);
+  animation: floatUp 1.1s ease-out forwards;
+}
+.popup.allclear { font-size: 38px; color: var(--accent); top: 30%; animation-duration: 1.6s; }
+
+#toast {
+  position: fixed; left: 50%; top: 16px;
+  transform: translate(-50%, -80px);
+  background: rgba(20, 16, 43, .95);
+  border: 1px solid rgba(255, 255, 255, .2);
+  padding: 10px 18px; border-radius: 14px;
+  font-weight: 700; font-size: 14px; max-width: 92vw; text-align: center;
+  transition: transform .35s cubic-bezier(.2, 1.2, .4, 1);
+  z-index: 80;
+}
+#toast.show { transform: translate(-50%, 0); }
+
+/* ---------- overlay game over ---------- */
+#overlay {
+  position: fixed; inset: 0; z-index: 90;
+  display: grid; place-items: center;
+  background: rgba(8, 5, 24, .8);
+  backdrop-filter: blur(4px);
+}
+#overlay.hidden { display: none; }
+#overlay .card {
+  text-align: center; padding: 28px 40px; border-radius: 22px;
+  background: linear-gradient(160deg, #3a2a86, #1a1240);
+  border: 1px solid rgba(255, 255, 255, .2);
+  animation: rise .4s ease-out;
+}
+#overlay h2 { margin: 0 0 6px; font-size: 28px; }
+#overlay .big { font-size: 54px; font-weight: 900; margin: 4px 0; color: var(--accent); }
+#overlay .sub { margin: 0 0 18px; color: var(--muted); }
+#overlay button {
+  font-size: 17px; font-weight: 800; padding: 12px 28px; border: 0; border-radius: 14px;
+  background: var(--accent); color: #2a1b00; cursor: pointer;
+}
+#overlay button:active { transform: scale(.96); }
+
+/* ---------- keyframes ---------- */
+@keyframes pop {
+  0%   { transform: scale(1);    filter: brightness(1); }
+  40%  { transform: scale(1.18); filter: brightness(2.2); }
+  100% { transform: scale(0);    opacity: 0; }
+}
+@keyframes pulse   { from { filter: brightness(1); } to { filter: brightness(1.5); } }
+@keyframes floatUp { from { opacity: 1; transform: translate(-50%, 0); } to { opacity: 0; transform: translate(-50%, -80px); } }
+@keyframes rise    { from { opacity: 0; transform: translateY(20px) scale(.95); } to { opacity: 1; transform: none; } }

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="theme-color" content="#14102b">
+  <title>Block Blast Solo Unlimited</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-phase="1" data-mode="normal">
+
+  <div id="app">
+    <!-- Bar skor -->
+    <header class="hud">
+      <div class="stat"><span class="label">SKOR</span><span id="score">0</span></div>
+      <div class="stat"><span class="label">TERBAIK</span><span id="best">0</span></div>
+      <div class="stat"><span class="label">FASE</span><span id="phase">1</span></div>
+    </header>
+
+    <!-- Status mode kesulitan -->
+    <div class="status">
+      <span id="mode-badge" class="badge">NORMAL</span>
+      <div id="clear-dots" title="Full clear menuju mode tekanan"><i></i><i></i><i></i></div>
+      <div class="actions">
+        <button id="btn-mute" aria-label="Suara">🔊</button>
+        <button id="btn-restart" aria-label="Ulangi">↻</button>
+      </div>
+    </div>
+
+    <!-- Papan 8x8 -->
+    <main id="board-wrap">
+      <div id="board"></div>
+      <div id="fx"></div>
+    </main>
+
+    <!-- Tiga blok yang harus ditempatkan -->
+    <section id="tray"></section>
+  </div>
+
+  <div id="drag-layer"></div>
+  <div id="toast"></div>
+
+  <!-- Layar game over -->
+  <div id="overlay" class="hidden">
+    <div class="card">
+      <h2>Game Over</h2>
+      <p class="big" id="final-score">0</p>
+      <p class="sub" id="final-best">Terbaik: 0</p>
+      <button id="btn-again">Main Lagi</button>
+    </div>
+  </div>
+
+  <!-- Urutan skrip penting: yang dipakai harus dimuat lebih dulu -->
+  <script src="js/config.js"></script>
+  <script src="js/shapes.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/textures.js"></script>
+  <script src="js/board.js"></script>
+  <script src="js/difficulty.js"></script>
+  <script src="js/generator.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
